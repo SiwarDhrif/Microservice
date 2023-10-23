@@ -1,13 +1,13 @@
 version: "3.7"
 services:
-  eureka:
+  Eureka:
     container_name: serviceregistry
     build: .\EurekaServer
     ports:
       - "8761:8761"
     hostname: serviceregistry
     image: "eureka"
-
+    
   mysql_reclamation:
     image: "mysql:5.6"
     container_name: mysql_reclamation
@@ -21,7 +21,7 @@ services:
       timeout: 20s
       retries: 10
 
-  reclamation:
+  Reclamation:
     container_name: reclamation
     build: .\Spring - Reclamation
     ports:
@@ -35,7 +35,89 @@ services:
     image: "reclamation"
     depends_on:
       - mysql_reclamation
-      - eureka
+      - Eureka
+
+  mysql_delivery:
+    image: "mysql:5.6"
+    container_name: mysql_delivery
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    ports:
+      - "3308:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  delivery:
+    container_name: delivery
+    build: .\Spring - Delivery
+    ports:
+      - "8804:8804"
+    hostname: delivery
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://serviceregistry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql_delivery:3306/delivery?useUnicode=true&useJDBCCompliantTimezoneShift=true&createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+    image: "delivery"
+    depends_on:
+      - mysql_delivery
+      - Eureka
+
+  mysql_product:
+    image: "mysql:5.6"
+    container_name: mysql_product
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    ports:
+      - "3309:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  productt:
+    container_name: productt
+    build: .\Spring - Product
+    ports:
+      - "8805:8805"
+    hostname: productt
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://serviceregistry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql_product:3306/product?useUnicode=true&useJDBCCompliantTimezoneShift=true&createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+    image: "productt"
+    depends_on:
+      - mysql_product
+      - Eureka
+
+  blogforum:
+    container_name: blogforum
+    build: .\Spirng - Blog
+    ports:
+      - "8802:8802"
+    hostname: reclamation
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://serviceregistry:8761/eureka/
+    image: "blogforum"
+    depends_on:
+      - Eureka
+  
+  eventt:
+    container_name: eventt
+    build: .\Spring - Event
+    ports:
+      - "8803:8803"
+    hostname: eventt
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://serviceregistry:8761/eureka/
+    image: "eventt"
+    depends_on:
+      - Eureka
 
   mongo_db:
     container_name: db_container
@@ -59,7 +141,7 @@ services:
       DB_NAME: BNS
     depends_on:
       - mongo_db
-      - eureka
+      - Eureka
 
 volumes:
   mongo_db: {}
