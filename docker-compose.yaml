@@ -7,6 +7,24 @@ services:
       - "8761:8761"
     hostname: serviceregistry
     image: "eureka"
+  
+  gateway_v2:
+    container_name: gateway_v2
+    build: .\Gateway
+    ports:
+      - "8809:8809"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://serviceregistry:8761/eureka/
+    hostname: gateway_v2
+    image: "gateway_v2"
+    depends_on:
+      - Eureka
+      - reclamationoffre
+      - deliveryorder
+      - productshop
+      - blogforum
+      - eventv1
+      - node_api
     
   mysql_reclamation:
     image: "mysql:5.6"
@@ -21,18 +39,18 @@ services:
       timeout: 20s
       retries: 10
 
-  Reclamation:
-    container_name: reclamation
+  reclamationoffre:
+    container_name: reclamationoffre
     build: .\Spring - Reclamation
     ports:
       - "8801:8801"
-    hostname: reclamation
+    hostname: reclamationoffre
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://serviceregistry:8761/eureka/
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql_reclamation:3306/reclamation?useUnicode=true&useJDBCCompliantTimezoneShift=true&createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
-    image: "reclamation"
+    image: "reclamationoffre"
     depends_on:
       - mysql_reclamation
       - Eureka
@@ -50,18 +68,18 @@ services:
       timeout: 20s
       retries: 10
 
-  delivery:
-    container_name: delivery
+  deliveryorder:
+    container_name: deliveryorder
     build: .\Spring - Delivery
     ports:
       - "8804:8804"
-    hostname: delivery
+    hostname: deliveryorder
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://serviceregistry:8761/eureka/
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql_delivery:3306/delivery?useUnicode=true&useJDBCCompliantTimezoneShift=true&createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
-    image: "delivery"
+    image: "deliveryorder"
     depends_on:
       - mysql_delivery
       - Eureka
@@ -79,18 +97,18 @@ services:
       timeout: 20s
       retries: 10
 
-  productt:
-    container_name: productt
+  productshop:
+    container_name: productshop
     build: .\Spring - Product
     ports:
       - "8805:8805"
-    hostname: productt
+    hostname: productshop
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://serviceregistry:8761/eureka/
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql_product:3306/product?useUnicode=true&useJDBCCompliantTimezoneShift=true&createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
-    image: "productt"
+    image: "productshop"
     depends_on:
       - mysql_product
       - Eureka
@@ -100,22 +118,22 @@ services:
     build: .\Spirng - Blog
     ports:
       - "8802:8802"
-    hostname: reclamation
+    hostname: blogforum
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://serviceregistry:8761/eureka/
     image: "blogforum"
     depends_on:
       - Eureka
   
-  eventt:
-    container_name: eventt
+  eventv1:
+    container_name: eventv1
     build: .\Spring - Event
     ports:
       - "8803:8803"
-    hostname: eventt
+    hostname: eventv1
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://serviceregistry:8761/eureka/
-    image: "eventt"
+    image: "eventv1"
     depends_on:
       - Eureka
 
